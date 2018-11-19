@@ -19,11 +19,9 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-
 @Component
-export default class HelloWorld extends Vue {
+export default class Games extends Vue {
   @Prop() private msg!: string;
-
   private games = [
     {
       id: 1,
@@ -34,7 +32,7 @@ export default class HelloWorld extends Vue {
       name: 'name2',
     },
     {
-      id: 2,
+      id: 3,
       name: 'name2',
     },
   ];
