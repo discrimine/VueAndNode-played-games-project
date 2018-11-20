@@ -1,18 +1,33 @@
 <template>
-  <div class="games-blocks">
-    <div class="games-block">
-      <div class="games-block_title"> in process </div>
-      <div class="games-block_games">
-        <div class="games-block_game" v-for="game in games" :key="game.id">
-          {{ game.name }}
+<div class="container">
+  <div class="row">
+      <div class="header">
+        <div class="header_title">
+          Played Games
         </div>
-      </div> 
-    </div>
-    <div class="games-block">
-      <div class="games-block_title"> completed </div>
-    </div>
-    <div class="games-block">
-     <div class="games-block_title"> not yet </div>
+        <div class="header_controls">
+          <div class="header_controls-container">
+            <div class="header_controls__design"></div>
+            <div class="header_controls__buttons"></div>
+          </div>
+        </div>
+      </div>
+      <div class="games-blocks col-12">
+        <div class="games-block col-3">
+          <div class="games-block_title"> in process </div>
+          <div class="games-block_games">
+            <div class="games-block_game" v-for="game in games" :key="game.id">
+              {{ game.name }}
+            </div>
+          </div> 
+        </div>
+        <div class="games-block col-3">
+          <div class="games-block_title"> completed </div>
+        </div>
+        <div class="games-block col-3">
+        <div class="games-block_title"> not yet </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -46,13 +61,11 @@ export default class Games extends Vue {
   flex-direction: row;
   align-self: center;
   justify-content: space-between;
-  max-width: 1440px;
   .games-block {
     border: 1px solid #696968;
-    width: 32%;
-    height: 100vh;
     display: flex;
     flex-direction: column;
+    min-height: 600px;
     .games-block_title {
       margin-top: 15px;
       font-weight: 400;
@@ -64,10 +77,10 @@ export default class Games extends Vue {
       display: flex;
       flex-direction: row;
       .games-block_game {
-      width: 50px;
-      height: 50px;
-      margin: 0 25px;
-      border: 1px solid #19530d;
+        width: 50px;
+        height: 50px;
+        margin: 0px 15px;
+        border: 1px solid #19530d;
       }
     }
   }

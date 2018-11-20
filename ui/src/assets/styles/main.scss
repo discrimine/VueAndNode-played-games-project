@@ -1,0 +1,17 @@
+//colors
+$darkBlue: #004466;
+$blue: #016699;
+
+//games-component
+
+.header {
+    margin: 25px 0;
+    .header_title {
+        color: $darkBlue;
+        font-size: 42px;
+    }
+    .header_controls {
+        border: 1px solid $blue;
+        display: flex;
+    }
+}
