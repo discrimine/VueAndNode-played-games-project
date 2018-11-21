@@ -35,22 +35,161 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 @Component
-export default class Games extends Vue {
-  @Prop() private msg!: string;
-  private games = [
+
+export type TIGamesResponseItem = {
+  id: number,
+  name: string,
+  genre: string,
+  status: (0 | 1 | 2)
+};
+export type TIGamesResponseReturn = TIGamesResponseItem[];
+
+export type TICortegeGames = {
+  0: {
+    title: 'not yet',
+    genres: {
+
+    }
+  }
+  1: {
+    title: 'completed',
+    genres: {
+
+    }
+  }
+  2: {
+    title: 'in process',
+    genres: {
+
+    }
+  }
+}
+
+const games: TIGamesResponseReturn = [
     {
       id: 1,
-      name: 'name',
+      name: 'Kingdom Come: Deliverance',
+      genre: 'RPG',
+      status: 2
     },
     {
       id: 2,
-      name: 'name2',
+      name: 'Metro',
+      genre: 'shooter',
+      status: 0
     },
     {
       id: 3,
-      name: 'name2',
+      name: 'Dying Light',
+      genre: 'shooter',
+      status: 0
+    },
+    {
+      id: 4,
+      name: 'Deus Ex',
+      genre: 'shooter',
+      status: 0
+    },
+    {
+      id: 5,
+      name: 'fallout 3',
+      genre: 'RPG',
+      status: 0
+    },
+    {
+      id: 6,
+      name: 'titan quest',
+      genre: 'RPG',
+      status: 0
+    },
+    {
+      id: 7,
+      name: 'darksouls3',
+      genre: 'RPG',
+      status: 1
+    },
+    {
+      id: 8,
+      name: 'wither1',
+      genre: 'RPG',
+      status: 1
+    },
+    {
+      id: 9,
+      name: 'Skyrim',
+      genre: 'RPG',
+      status: 1
+    },
+    {
+      id: 10,
+      name: 'GTA 5',
+      genre: 'shooter',
+      status: 1
+    },
+    {
+      id: 11,
+      name: 'GTA 4',
+      genre: 'shooter',
+      status: 1
+    },
+    {
+      id: 12,
+      name: 'Far Cry 5',
+      genre: 'shooter',
+      status: 1
+    },
+    {
+      id: 13,
+      name: 'Time shift',
+      genre: 'shooter',
+      status: 1
     },
   ];
+//TODO complete data method
+  function returnUniqueFromObj(arr: TIGamesResponseReturn) {
+    let obj = {};
+    for (let i = 0; i < arr.length; i++) {
+      let status: string = arr[i].status;
+      let genre: string = arr[i].genre;
+      obj[String(genre) + String(status)] = true;
+    }
+
+    return obj;
+  }
+  const uniqStatuses = returnUniqueFromObj(games)
+  const gamesLength = games.length;
+  console.log('1', uniqStatuses);
+  let cortegeGames: TICortegeGames = {
+    0: {
+      title: 'not yet',
+      genres: [
+
+      ]
+    },
+    1: {
+      title: 'completed',
+      genres: [
+
+      ]
+    },
+    2: {
+      title: 'in process',
+      genres: [
+
+      ]
+    }
+  }
+
+  for (let i: number = 0; i < uniqStatusesLength; i++) {
+  }
+
+console.log(cortegeGames);
+
+
+export default class Games extends Vue {
+
+  
+
 }
 </script>
 
