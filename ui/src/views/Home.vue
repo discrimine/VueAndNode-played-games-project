@@ -1,9 +1,10 @@
 <template>
 <Games
-  v-on:getData="getData()"
   v-on:addGame="addGame()"
+  v-on:deleteGame="deleteGame()"
   :gamesView="gamesView"
   :newGameEntity="newGameEntity"
+  :currentGame="currentGame"
   >
   </Games>
 </template>
@@ -45,22 +46,23 @@ export default class Home extends Vue {
   }
 
   public getData() {
-  axios.get('http://localhost:3000/games/')
-    .then((json) => {
-      const response = json.data;
-      const games_length = response.length;
-      for (let i = 0; i < games_length; i++) {
-        const status: number = response[i].status;
-        const genre: string = response[i].genre;
-        Vue.set(this.gamesView[status].genres, genre, []);
-      }
+    axios.get('http://localhost:3000/games/')
+      .then((json) => {
+        const response = json.data;
+        const games_length = response.length;
+        for (let i = 0; i < games_length; i++) {
+          const status: number = response[i].status;
+          const genre: string = response[i].genre;
+          Vue.set(this.gamesView[status].genres, genre, []);
+        }
 
-      for (const game of json.data) {
-        this.gamesView[game.status].genres[game.genre].push({
-          name: game.name,
-        });
-      }
-    });
+        for (let i:number = 0; i < games_length; i++) {
+          this.gamesView[response[i].status].genres[response[i].genre].push({
+            id: response[i]._id,
+            name: response[i].name,
+          });
+        }
+      });
   }
 
   public newGameEntity: any = {
@@ -68,6 +70,10 @@ export default class Home extends Vue {
     genre: undefined,
     status: undefined,
   };
+
+  public currentGame: any = {
+    id: undefined,
+  }
 
   public addGame() {
     const newGame = this.newGameEntity;
@@ -85,22 +91,24 @@ export default class Home extends Vue {
       }
     }
 
-    newGameResponse = JSON.stringify(newGameResponse);
+    //newGameResponse = JSON.stringify(newGameResponse);
 
     if (!validation) {
       alert('choose game attributes');
     } else {
-      fetch('http://localhost:3000/games/', {
-        method: 'post',
-        headers: {
-          'content-type': 'application/json',
-        },
-        body: newGameResponse,
-      })
+      axios.post('http://localhost:3000/games/', newGameResponse)
       .then((response) => {
         this.getData();
-        
-        return response.json();
+      });
+    }
+  }
+
+  public deleteGame(id: number) {
+    const validation = confirm('are u sure?');
+    if (validation) {
+      axios.delete('http://localhost:3000/games/' + this.currentGame.id)
+      .then((response) => {
+          this.getData();
       });
     }
   }

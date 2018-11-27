@@ -8,15 +8,7 @@ router.get('/', (req, res, next) => {
     Game.find()
         .exec()
         .then(docs => {
-            console.log(docs);
-            if (docs.length > 0) {
-                res.status(200).json(docs)
-            } else {
-                res.status(404).json({
-                    message: 'No entries found'
-                })
-            }
-            
+            res.status(200).json(docs)
         })
         .catch(err => {
             console.log(err);
@@ -29,25 +21,30 @@ router.get('/', (req, res, next) => {
 router.post('/', (req, res, next) => {
     const game = new Game({
         _id: new mongoose.Types.ObjectId(),
-        name: req.body.name,
-        genre: req.body.genre,
-        isCompleted: req.body.isCompleted
     });
-    game
+    body_content = req.body
+    body_length = body_content.length;
+    if (body_length > 2) {
+        for (let i = 0; i < body_length; i++) {
+            game[body_content[i].propName] = body_content[i].value;
+        }
+        game
         .save()
         .then(result => {
             res.status(201).json({
                 message: 'Games for post',
                 createdProduct: result
             });
-    })
+        })
         .catch(err => {
             console.log(err);
-            res.status(500).json({
+            res.status(204).json({
                 error: err
             });
         });
-    
+    } else {
+        res.status(500).json({error: err})
+    }  
 });
 
 router.get('/:gameId', (req, res, next) => {

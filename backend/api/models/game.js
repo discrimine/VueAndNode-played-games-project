@@ -4,7 +4,7 @@ const gameSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     name: String,
     genre: String,
-    isCompleted: Boolean
+    status: Number
 })
 
 module.exports = mongoose.model('Game', gameSchema);
