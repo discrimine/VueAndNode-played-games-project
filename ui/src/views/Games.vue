@@ -1,6 +1,6 @@
 <template>
-<div class="container">
-  <div class="row">
+  <div class="container">
+    <div class="row">
       <div class="header">
         <div class="header_title">
           Played Games
@@ -28,7 +28,7 @@
                     placeholder="game title"
                   >
                 </b-form-input>
-              <b-button v-on:click="$emit('addGame')" :variant="'primary'"> add new </b-button>
+              <b-button v-on:click="gameAdd()" :variant="'primary'"> add new </b-button>
             </div>
           </div>
         </div>
@@ -44,8 +44,8 @@
                 </div>
                 <div class="games-block_genre__body">
                   <div class="games-block_genre__body___game" v-for="game in genre" :key="game.id">
-                    <div v-on:click="gameEdit(game.id, $event)" class="title"> {{ game.name }} </div>
-                    <div v-if="configVisibility.id === game.id" class="edit" :game-id="game.id">
+                    <div  v-on:click="gameEdit(game.id)"  class="title"> {{ game.name }} </div>
+                    <div v-if="visibleGameOptionId === game.id" class="edit">
                       <b-button v-on:click="gameDelete(game.id)" :variant="'danger'"></b-button>
                     </div>
                   </div>
@@ -54,85 +54,131 @@
             </div>
           </div> 
         </div> 
-      </div> 
-     </div>  
-  </div>
+      </div>
+    </div>   
+  </div>    
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+<script>
+// @ is an alias to /src
+import Vue from "vue";
 import axios from 'axios';
 
-export interface TIGamesResponseItem {
-  id: number;
-  name: string;
-  genre: string;
-  status: (0 | 1 | 2);
-}
+Vue.use(axios);
 
-export interface TIGameAdd  {
-  name: string | undefined;
-  genre: string | undefined;
-  status: ((0 | 1 | 2 | undefined));
-}
+export default {
+  name: 'games',
+  data: function() {
+    return {
+      apiUrl: 'https://peridot-pastry.glitch.me/games/',
+      visibleGameOptionId: undefined,
+      gamesView: {
+        0: {
+          title: 'not yet',
+          genres: {},
+        },
+        1: {
+          title: 'completed',
+          genres: {},
+        },
+        2: {
+          title: 'in process',
+          genres: {},
+        },
+      },
+      newGameEntity: {
+        name: undefined,
+        genre: undefined,
+        status: undefined
+      }
+    }
+  },
+  methods: {
+    getData() {
+      axios.get(this.apiUrl)
+        .then((json) => {
+          for (const gameStatus in this.gamesView) {
+            this.gamesView[gameStatus].genres = {};
+          }
+          const response = json.data;
+          const games_length = response.length;
+          response.map((el) => {
+            if (el.genre === undefined) {
+              el.genre = 'without genre';
+            }
+            if (el.name === undefined) {
+              el.name = 'without name';
+            }
+            if (el.status === undefined) {
+              el.status = 0;
+            }
+          })
 
-export type TIGamesResponseReturn = TIGamesResponseItem[];
-
-export interface TICortegeGames {
-  0: {
-    title: 'not yet',
-    genres: {
-
+          // uniq genres
+          for (let i = 0; i < games_length; i++) {
+            const status = response[i].status;
+            const genre = response[i].genre;
+            Vue.set(this.gamesView[status].genres, genre, []);
+          }
+          // push games to genres
+          for (let i = 0; i < games_length; i++) {
+            this.gamesView[response[i].status].genres[response[i].genre].push({
+              id: response[i]._id,
+              name: response[i].name,
+            });
+          }
+        });
     },
-  };
-  1: {
-    title: 'completed',
-    genres: {
-
+    gameEdit(id) {
+      this.visibleGameOptionId = id;
     },
-  };
-  2: {
-    title: 'in process',
-    genres: {
-
+    gameDelete(id) {
+      const validation = confirm('are u sure?');
+      if (validation) {
+        axios.delete(this.apiUrl + id)
+        .then(() => {
+          this.getData();
+        });
+      }
     },
-  };
-}
-@Component
-export default class Games extends Vue {
-@Prop() private gamesView;
-@Prop() private newGameEntity;
-@Prop() private currentGame;
+    gameAdd() {
+      const newGame = this.newGameEntity;
+      let newGameRequest = [];
+      let validation = true;
 
-public games: TIGamesResponseReturn = [];
+      for (const gameAttribute in newGame) {
+        if (newGame[gameAttribute] === undefined) {
+          validation = false;
+        } else {
+          newGameRequest.push({
+            propName: gameAttribute,
+            value: newGame[gameAttribute],
+          });
+        }
+      }
 
-public configVisibility = {}
-
-public gameEdit(id: number, ev: any): void {
-  this.configVisibility = {}
-  this.configVisibility = {
-    id: id
-  };
-}
-
-public gameDelete(id: number): void {
-  this.currentGame.id = id;
-  this.$emit('deleteGame');
-}
-
-created() {
-  document.onclick = (e) => {
-    if(e.target.parentNode.classList[0] !== 'games-block_genre__body___game') {
-      this.configVisibility = {}
+      if (!validation) {
+        alert('choose game attributes');
+      } else {
+        axios.post(this.apiUrl, newGameRequest)
+        .then(() => {
+          this.getData();
+        });
+      }
+    },
+  },
+  created: function() {
+    this.getData();
+    document.onclick = e => {
+      if(e.target.parentNode.classList[0] !== 'games-block_genre__body___game') {
+        this.configVisibility = {}
+      }
     }
   }
-}
 
-}
-
+};
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
 //fonts
 @import url('https://fonts.googleapis.com/css?family=Rubik');
