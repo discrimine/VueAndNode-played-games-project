@@ -9,6 +9,7 @@
           <div class="header_controls-container">
             <div class="header_controls__design"></div>
             <div class="header_controls__buttons">
+              <div class="header_controls__buttons___new-game">
                 <b-form-select v-model="newGameEntity.genre">
                     <option value="Action">Action</option>
                     <option value="Shooter">Shooter</option>
@@ -20,7 +21,6 @@
                 <b-form-select v-model="newGameEntity.status">
                     <option value="0">not yet</option>
                     <option value="1">completed</option>
-                    <option value="2">in process</option>
                 </b-form-select>
                   <b-form-input
                     v-model="newGameEntity.name"
@@ -28,13 +28,14 @@
                     placeholder="game title"
                   >
                 </b-form-input>
-              <b-button v-on:click="gameAdd()" :variant="'primary'"> add new </b-button>
+                <b-button v-on:click="gameAdd()" :variant="'primary'"> add new </b-button>
+              </div>
             </div>
           </div>
         </div>
       </div>
       <div class="games-blocks col-12">
-        <div class="games-block col-3" v-for="gameStatus in gamesView" :key="gameStatus.title">
+        <div class="games-block col-5" v-for="gameStatus in gamesView" :key="gameStatus.title">
           <div class="games-block-container">
             <div class="games-block_title"> {{ gameStatus.title }} </div>
             <div class="games-block_genres" v-for="(genre, title) in gameStatus.genres" :key="genre.id">
@@ -79,10 +80,6 @@ export default {
         },
         1: {
           title: 'completed',
-          genres: {},
-        },
-        2: {
-          title: 'in process',
           genres: {},
         },
       },
@@ -171,7 +168,7 @@ export default {
     this.getData();
     document.onclick = e => {
       if(e.target.parentNode.classList[0] !== 'games-block_genre__body___game') {
-        this.configVisibility = {}
+        this.visibleGameOptionId = undefined;
       }
     }
   }
@@ -215,30 +212,6 @@ $blue: #99CCCC;
       align-items: center;
       justify-content: center;
       margin: 25px;
-      .header_controls__buttons {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        select {
-          width: 100px;
-          font-size: 12px;
-          margin-right: 15px;
-          border-color: $darkBlue;
-        }
-        input {
-          width: 180px;
-          margin-right: 15px;
-          font-size: 12px;
-          border-color: $darkBlue;
-        }
-        button {
-          width: 70px;
-          font-size: 12px;
-          background-color: $darkBlue;
-          color: white;
-          border-color: $darkBlue;
-        }
-      }
     }
   }
 }
@@ -256,7 +229,7 @@ $blue: #99CCCC;
     max-height: 800px;
     overflow: auto;
     .games-block-container{
-      margin: 15px 0;
+      padding: 20px;
       .games-block_title {
         font-weight: 400;
         font-size: 28px;
@@ -289,7 +262,7 @@ $blue: #99CCCC;
               width: 25%;
               position: relative;
               border: 1px solid $blue;
-              font-size: 8px;
+              font-size: 14px;
               word-wrap: break-word;
               .title {
                 position: absolute;
@@ -300,15 +273,18 @@ $blue: #99CCCC;
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                margin: 5px;
               }
               .edit {
                 display: block;
                 position: absolute;
                 width: 100%;
-                bottom: -50px;
                 left: 0;
-                height: 50px;
+                bottom: 0;
                 border: 1px solid $darkBlue;
+                background-color: white;
+                z-index: 1;
+                border-radius: 5px;
               }
             }
           }
