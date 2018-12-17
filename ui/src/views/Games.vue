@@ -2,37 +2,46 @@
   <div class="container">
     <div class="row">
       <div class="header">
-        <div class="header_title">
+        <div class="header_title col-4">
           Played Games
         </div>
-        <div class="header_controls">
-          <div class="header_controls-container">
-            <div class="header_controls__design"></div>
-            <div class="header_controls__buttons">
-              <div class="header_controls__buttons___new-game">
-                <b-form-select v-model="newGameEntity.genre">
-                    <option value="Action">Action</option>
-                    <option value="Shooter">Shooter</option>
-                    <option value="Arcade">Arcade</option>
-                    <option value="RPG">RPG</option>
-                    <option value="Strategy">Strategy</option>
-                    <option value="Platformer">Platformer</option>
-                </b-form-select>
-                <b-form-select v-model="newGameEntity.status">
-                    <option value="0">not yet</option>
-                    <option value="1">completed</option>
-                </b-form-select>
-                  <b-form-input
-                    v-model="newGameEntity.name"
-                    type="text"
-                    placeholder="game title"
-                  >
-                </b-form-input>
-                <b-button v-on:click="gameAdd()" :variant="'primary'"> add new </b-button>
+        <div class="header_title col-1">
+          <img src="../assets/settings.png" alt="show controls" width="50px" height="50px" v-on:click="controlsIsVisible = true">
+        </div>
+        <transition name="fade">
+          <div class="header_controls" v-if="controlsIsVisible">
+            <div class="container">
+              <div class="row">
+                <div class="header_controls-container">
+                  <div class="header_controls__buttons___new-game col-3">
+                    <b-form-select v-model="newGameEntity.genre">
+                        <option value="Action">Action</option>
+                        <option value="Shooter">Shooter</option>
+                        <option value="Arcade">Arcade</option>
+                        <option value="RPG">RPG</option>
+                        <option value="Strategy">Strategy</option>
+                        <option value="Platformer">Platformer</option>
+                    </b-form-select>
+                    <b-form-select v-model="newGameEntity.status">
+                        <option value="0">not yet</option>
+                        <option value="1">completed</option>
+                    </b-form-select>
+                      <b-form-input
+                        v-model="newGameEntity.name"
+                        type="text"
+                        placeholder="game title"
+                      >
+                    </b-form-input>
+                    <b-button v-on:click="gameAdd()" :variant="'primary'"> add new </b-button>
+                  </div>
+                  <div class="col-1">
+                    <img src="../assets/exit.png" alt="hide controls" width="50px" height="50px" v-on:click="controlsIsVisible = false">
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </transition>  
       </div>
       <div class="games-blocks col-12">
         <div class="games-block col-5" v-for="gameStatus in gamesView" :key="gameStatus.title">
@@ -56,8 +65,19 @@
           </div> 
         </div> 
       </div>
-    </div>   
-  </div>    
+    </div>
+    <div id="service">
+      <transition name="fade">    
+        <div
+          class="action-msg"
+          :class="notificationServiceEntity.class"
+          v-if="notificationServiceEntity.checking"
+        >
+        {{ notificationServiceEntity.message }}
+        </div>
+      </transition>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -87,10 +107,28 @@ export default {
         name: undefined,
         genre: undefined,
         status: undefined
+      },
+      controlsIsVisible: false,
+      notificationServiceEntity: {
+        checking: false,
+        class: "",
+        message: "",
       }
     }
   },
   methods: {
+     notificationService(type, msg) {
+      this.notificationServiceEntity.class = type;
+      this.notificationServiceEntity.message = msg;
+      this.notificationServiceEntity.checking = true;
+      setTimeout(() => {
+        this.notificationServiceEntity = {
+          checking: false,
+          class: "",
+          message: "",
+        }
+      }, 3000)
+    },
     getData() {
       axios.get(this.apiUrl)
         .then((json) => {
@@ -135,6 +173,7 @@ export default {
         axios.delete(this.apiUrl + id)
         .then(() => {
           this.getData();
+          this.notificationService("msg-danger", "game deleted")
         });
       }
     },
@@ -153,16 +192,17 @@ export default {
           });
         }
       }
-
       if (!validation) {
         alert('choose game attributes');
       } else {
         axios.post(this.apiUrl, newGameRequest)
         .then(() => {
           this.getData();
+          this.notificationService("msg-success", "game added");
         });
       }
     },
+    
   },
   created: function() {
     this.getData();
@@ -182,7 +222,10 @@ export default {
 
 //colors
 $darkBlue: #004466;
-$blue: #99CCCC;
+$medBlue: #016699;
+$lightBlue: #99cccc;
+$red: #FF2105;
+$success: #26991E; 
 
 * {
   font-family: 'rubik'
@@ -199,19 +242,36 @@ $blue: #99CCCC;
     font-size: 42px;
   }
   .header_controls {
-    height: 100px;
+    z-index: 1;
+    width: 100vw;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background-color: white;
+    border-color: $lightBlue;
     border-radius: 5px;
     display: flex;
     align-items: center;
-    border: 1px solid $blue;
+    border: 1px solid $lightBlue;
     display: flex;
     justify-content: space-between;
     .header_controls-container {
-      height: 55px;
       display: flex;
       align-items: center;
-      justify-content: center;
+      width: 100%;
+      justify-content: space-between;
       margin: 25px;
+      .header_controls__buttons___new-game {
+        select:nth-child(2) {
+          margin-top: 10px;
+        }
+        input {
+          margin-top: 10px;
+        }
+        button {
+          margin-top: 10px;
+        }
+      }
     }
   }
 }
@@ -221,7 +281,7 @@ $blue: #99CCCC;
   align-self: center;
   justify-content: space-between;
   .games-block {
-    border: 2px solid $blue;
+    border: 2px solid $lightBlue;
     border-radius: 5px;
     box-shadow: 5px 5px 10px rgba(0,0,0,0.25);
     display: flex;
@@ -243,7 +303,7 @@ $blue: #99CCCC;
           .games-block_genre__title {
             font-weight: 600;
             text-align: left;
-            color: $blue;
+            color: $lightBlue;
           }
           .games-block_genre__body {
             display: flex;
@@ -261,7 +321,7 @@ $blue: #99CCCC;
               padding-top: 25%;
               width: 25%;
               position: relative;
-              border: 1px solid $blue;
+              border: 1px solid $lightBlue;
               font-size: 14px;
               word-wrap: break-word;
               .title {
@@ -306,5 +366,33 @@ li {
 }
 a {
   color: #42b983;
+}
+.action-msg {
+  position: fixed;
+  z-index: 2;
+  background-color: white;
+  bottom: 10%;
+  width: 200px;
+  left: 50%;
+  margin-left: -100px;
+  font-size: 16px;
+  height: 50px;
+  border-radius: 5px;
+  box-shadow: 5px 5px 10px rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.msg-danger {
+  border: 1px solid $red;
+  color: $red;
+}
+.msg-success {
+  border: 1px solid $success;
+  color: $success;
+}
+.msg-info {
+  border: 1px solid $medBlue;
+  color: $medBlue;
 }
 </style>
