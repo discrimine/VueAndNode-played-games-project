@@ -14,25 +14,51 @@
               <div class="row">
                 <div class="header_controls-container">
                   <div class="header_controls__buttons___new-game col-3">
-                    <b-form-select v-model="newGameEntity.genre">
-                        <option value="Action">Action</option>
-                        <option value="Shooter">Shooter</option>
-                        <option value="Arcade">Arcade</option>
-                        <option value="RPG">RPG</option>
-                        <option value="Strategy">Strategy</option>
-                        <option value="Platformer">Platformer</option>
-                    </b-form-select>
-                    <b-form-select v-model="newGameEntity.status">
-                        <option value="0">not yet</option>
-                        <option value="1">completed</option>
-                    </b-form-select>
+                    <div class="new-game_block">
+                      <b-form-select v-model="newGameEntity.genre">
+                          <option :value="undefined" disabled>genre</option>
+                          <option value="Action">Action</option>
+                          <option value="Shooter">Shooter</option>
+                          <option value="Arcade">Arcade</option>
+                          <option value="RPG">RPG</option>
+                          <option value="Strategy">Strategy</option>
+                          <option value="Platformer">Platformer</option>
+                      </b-form-select>
+                    </div>
+                    <div class="new-game_block">
+                      <div>
+                        <b-form-select v-model="newGameEntity.status">
+                            <option :value="undefined" disabled>status</option>
+                            <option value="0">not yet</option>
+                            <option value="1">completed</option>
+                        </b-form-select>
+                      </div>
+                      <div>
+                        <b-form-input v-model="newGameEntity.year" type="text" placeholder="year"></b-form-input>
+                      </div> 
+                    </div>
+                    <div class="new-game_block">
                       <b-form-input
                         v-model="newGameEntity.name"
                         type="text"
                         placeholder="game title"
                       >
                     </b-form-input>
-                    <b-button v-on:click="gameAdd()" :variant="'primary'"> add new </b-button>
+                    </div>
+                    <div class="new-game_block">
+                      <b-button v-on:click="gameAdd()" :variant="'primary'"> add new </b-button>
+                    </div>
+                  </div>
+                  <div class="header_controls__buttons___filter col-3">
+                    <div class="filter_block">
+                      <b-form-input v-on:change="viewFilter()" v-model="viewConfigEntity.filter.name" type="text" placeholder="name"></b-form-input>
+                    </div>
+                    <div class="filter_block">
+                      <b-form-input v-on:change="viewFilter()" v-model="viewConfigEntity.filter.genre" type="text" placeholder="genre"></b-form-input>
+                    </div>
+                    <div class="filter_block">
+                      <b-form-input v-on:change="viewFilter()" v-model="viewConfigEntity.filter.year" type="text" placeholder="year"></b-form-input>
+                    </div>
                   </div>
                   <div class="col-1">
                     <img src="../assets/exit.png" alt="hide controls" width="50px" height="50px" v-on:click="controlsIsVisible = false">
@@ -54,7 +80,7 @@
                 </div>
                 <div class="games-block_genre__body">
                   <div class="games-block_genre__body___game" v-for="game in genre" :key="game.id">
-                    <div  v-on:click="gameEdit(game.id)"  class="title"> {{ game.name }} </div>
+                    <div v-on:click="gameEdit(game.id)"  class="title"> {{ game.name }} </div>
                     <div v-if="visibleGameOptionId === game.id" class="edit">
                       <b-button v-on:click="gameDelete(game.id)" :variant="'danger'"></b-button>
                     </div>
@@ -82,7 +108,7 @@
 
 <script>
 // @ is an alias to /src
-import Vue from "vue";
+import Vue from 'vue';
 import axios from 'axios';
 
 Vue.use(axios);
@@ -106,18 +132,29 @@ export default {
       newGameEntity: {
         name: undefined,
         genre: undefined,
-        status: undefined
+        status: undefined,
+        year: undefined,
       },
       controlsIsVisible: false,
       notificationServiceEntity: {
         checking: false,
         class: "",
         message: "",
+      },
+      viewConfigEntity: {
+        sort: {
+
+        },
+        filter: {
+          name: undefined,
+          genre: undefined,
+          year: undefined
+        }
       }
     }
   },
   methods: {
-     notificationService(type, msg) {
+    notificationService(type, msg) {
       this.notificationServiceEntity.class = type;
       this.notificationServiceEntity.message = msg;
       this.notificationServiceEntity.checking = true;
@@ -132,10 +169,22 @@ export default {
     getData() {
       axios.get(this.apiUrl)
         .then((json) => {
+          let response = json.data;
+          // FILTER
+          for (const filter in this.viewConfigEntity.filter) {
+            if (this.viewConfigEntity.filter[filter] !== undefined
+                && this.viewConfigEntity.filter[filter].length > 0
+            ) {
+              response = response.filter((game) => {
+                  return (String(game[filter]).indexOf(this.viewConfigEntity.filter[filter]) !== -1);
+              })
+            }
+          }
+
           for (const gameStatus in this.gamesView) {
             this.gamesView[gameStatus].genres = {};
           }
-          const response = json.data;
+          
           const games_length = response.length;
           response.map((el) => {
             if (el.genre === undefined) {
@@ -202,7 +251,9 @@ export default {
         });
       }
     },
-    
+    viewFilter() {
+      this.getData();
+    }
   },
   created: function() {
     this.getData();
@@ -262,13 +313,20 @@ $success: #26991E;
       justify-content: space-between;
       margin: 25px;
       .header_controls__buttons___new-game {
-        select:nth-child(2) {
+        height: 100%;
+        .new-game_block {
           margin-top: 10px;
+          display: flex;
+          justify-content: space-between;
+          div:first-child {
+            margin-right: 10px;
+            width: 100%;
+          }
         }
-        input {
-          margin-top: 10px;
-        }
-        button {
+      }
+      .header_controls__buttons___filter {
+        height: 100%;
+        .filter_block {
           margin-top: 10px;
         }
       }
