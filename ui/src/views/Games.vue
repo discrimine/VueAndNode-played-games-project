@@ -15,7 +15,7 @@
                 <div class="header_controls-container">
                   <div class="header_controls__buttons___new-game col-3">
                     <div class="new-game_block">
-                      <b-form-select v-model="newGameEntity.genre">
+                      <b-form-select v-model="currentGameEntity.genre">
                           <option :value="undefined" disabled>genre</option>
                           <option value="Action">Action</option>
                           <option value="Shooter">Shooter</option>
@@ -27,19 +27,19 @@
                     </div>
                     <div class="new-game_block">
                       <div>
-                        <b-form-select v-model="newGameEntity.status">
+                        <b-form-select v-model="currentGameEntity.status">
                             <option :value="undefined" disabled>status</option>
                             <option value="0">not yet</option>
                             <option value="1">completed</option>
                         </b-form-select>
                       </div>
                       <div>
-                        <b-form-input v-model="newGameEntity.year" type="text" placeholder="year"></b-form-input>
+                        <b-form-input v-model="currentGameEntity.year" type="text" placeholder="year"></b-form-input>
                       </div> 
                     </div>
                     <div class="new-game_block">
                       <b-form-input
-                        v-model="newGameEntity.name"
+                        v-model="currentGameEntity.name"
                         type="text"
                         placeholder="game title"
                       >
@@ -47,6 +47,7 @@
                     </div>
                     <div class="new-game_block">
                       <b-button v-on:click="gameAdd()" :variant="'primary'"> add new </b-button>
+                      <b-button v-on:click="gameSave()" :variant="'success'"> save </b-button>
                     </div>
                   </div>
                   <div class="header_controls__buttons___filter col-3">
@@ -61,7 +62,7 @@
                     </div>
                   </div>
                   <div class="col-1">
-                    <img src="../assets/exit.png" alt="hide controls" width="50px" height="50px" v-on:click="controlsIsVisible = false">
+                    <img class="cr-point" src="../assets/exit.png" alt="hide controls" width="50px" height="50px" v-on:click="controlsIsVisible = false">
                   </div>
                 </div>
               </div>
@@ -80,7 +81,7 @@
                 </div>
                 <div class="games-block_genre__body">
                   <div class="games-block_genre__body___game" v-for="game in genre" :key="game.id">
-                    <div v-on:click="gameEdit(game.id)"  class="title"> {{ game.name }} </div>
+                    <div v-on:click="gameEdit(game)"  class="title"> {{ game.name }} </div>
                     <div v-if="visibleGameOptionId === game.id" class="edit">
                       <b-button v-on:click="gameDelete(game.id)" :variant="'danger'"></b-button>
                     </div>
@@ -129,7 +130,7 @@ export default {
           genres: {},
         },
       },
-      newGameEntity: {
+      currentGameEntity: {
         name: undefined,
         genre: undefined,
         status: undefined,
@@ -209,12 +210,17 @@ export default {
             this.gamesView[response[i].status].genres[response[i].genre].push({
               id: response[i]._id,
               name: response[i].name,
+              genre: response[i].genre,
+              year: response[i].year,
+              status: response[i].status,
             });
           }
+          console.log(this.gamesView)
         });
     },
-    gameEdit(id) {
-      this.visibleGameOptionId = id;
+    gameEdit(game) {
+      this.visibleGameOptionId = game.id;
+      this.currentGameEntity = game;
     },
     gameDelete(id) {
       const validation = confirm('are u sure?');
@@ -222,12 +228,12 @@ export default {
         axios.delete(this.apiUrl + id)
         .then(() => {
           this.getData();
-          this.notificationService("msg-danger", "game deleted")
+          this.notificationService('msg-danger', 'game deleted')
         });
       }
     },
     gameAdd() {
-      const newGame = this.newGameEntity;
+      const newGame = this.currentGameEntity;
       let newGameRequest = [];
       let validation = true;
 
@@ -247,19 +253,58 @@ export default {
         axios.post(this.apiUrl, newGameRequest)
         .then(() => {
           this.getData();
-          this.notificationService("msg-success", "game added");
+          this.notificationService('msg-success', 'game added');
         });
       }
     },
+    gameSave() {
+      for (const gameAttribute in this.currentGameEntity) {
+        if (this.currentGameEntity[gameAttribute] === undefined) {
+          this.notificationService('msg-danger', 'some fields are empty');
+          return;
+        }
+      }
+
+      let newGameRequest = [];
+      const newGame = this.currentGameEntity;
+      for (const gameAttribute in newGame) {
+        if (newGame[gameAttribute] === undefined) {
+          validation = false;
+        } else {
+          newGameRequest.push({
+            propName: gameAttribute,
+            value: newGame[gameAttribute],
+          });
+        }
+      }
+
+      axios.patch('https://peridot-pastry.glitch.me/games/' + this.currentGameEntity.id, newGameRequest)
+      .then(() => {
+        this.getData();
+        this.notificationService('msg-success', 'game changed');
+      })
+    },
     viewFilter() {
       this.getData();
+    },
+    cleanCurrentGame() {
+      this.currentGameEntity = {
+        name: undefined,
+        genre: undefined,
+        status: undefined,
+        year: undefined,
+      }
     }
   },
   created: function() {
     this.getData();
     document.onclick = e => {
-      if(e.target.parentNode.classList[0] !== 'games-block_genre__body___game') {
+      // TODO: bad temporary solution, need to refactor
+      if (e.target.parentNode.classList[0] !== 'games-block_genre__body___game'
+      && e.target.parentNode.classList[0] !== 'new-game_block'
+      && e.target.parentNode.parentNode.classList[0] !== 'new-game_block') {
         this.visibleGameOptionId = undefined;
+        this.cleanCurrentGame();
       }
     }
   }
@@ -281,6 +326,10 @@ $success: #26991E;
 * {
   font-family: 'rubik'
 }
+
+.cr-point:hover {
+  cursor: pointer;
+}
 //games-component
 .header {
   display: flex;
@@ -289,6 +338,9 @@ $success: #26991E;
   justify-content: space-between;
   align-items: center;
   .header_title {
+    &:hover {
+      cursor: pointer;
+    }
     color: $darkBlue;
     font-size: 42px;
   }
@@ -358,6 +410,9 @@ $success: #26991E;
       }
       .games-block_genres {
         .games-block_genre{
+          &:hover {
+            cursor: pointer;
+          }
           .games-block_genre__title {
             font-weight: 600;
             text-align: left;
