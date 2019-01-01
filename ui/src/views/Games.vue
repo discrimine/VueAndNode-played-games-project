@@ -17,12 +17,7 @@
                     <div class="new-game_block">
                       <b-form-select v-model="currentGameEntity.genre">
                           <option :value="undefined" disabled>genre</option>
-                          <option value="Action">Action</option>
-                          <option value="Shooter">Shooter</option>
-                          <option value="Arcade">Arcade</option>
-                          <option value="RPG">RPG</option>
-                          <option value="Strategy">Strategy</option>
-                          <option value="Platformer">Platformer</option>
+                          <option v-for="genre in gameGenres" v-bind:key="genre" :value="genre">{{ genre }}</option>
                       </b-form-select>
                     </div>
                     <div class="new-game_block">
@@ -55,10 +50,16 @@
                       <b-form-input v-on:change="viewFilter()" v-model="viewConfigEntity.filter.name" type="text" placeholder="name"></b-form-input>
                     </div>
                     <div class="filter_block">
-                      <b-form-input v-on:change="viewFilter()" v-model="viewConfigEntity.filter.genre" type="text" placeholder="genre"></b-form-input>
+                      <b-form-select v-on:change="viewFilter()" v-model="viewConfigEntity.filter.genre">
+                          <option :value="undefined" disabled>genre</option>
+                          <option v-for="genre in gameGenres" v-bind:key="genre" :value="genre">{{ genre }}</option>
+                      </b-form-select>
                     </div>
                     <div class="filter_block">
                       <b-form-input v-on:change="viewFilter()" v-model="viewConfigEntity.filter.year" type="text" placeholder="year"></b-form-input>
+                    </div>
+                    <div class="filter_block">
+                      <b-button v-on:click="clearFilter()" variant="danger">clear filter</b-button>
                     </div>
                   </div>
                   <div class="col-1">
@@ -109,50 +110,58 @@
 
 <script>
 // @ is an alias to /src
-import Vue from 'vue';
-import axios from 'axios';
+import Vue from "vue";
+import axios from "axios";
 
 Vue.use(axios);
 
 export default {
-  name: 'games',
+  name: "games",
   data: function() {
     return {
-      apiUrl: 'https://peridot-pastry.glitch.me/games/',
+      apiUrl: "https://peridot-pastry.glitch.me/games/",
       visibleGameOptionId: undefined,
       gamesView: {
         0: {
-          title: 'not yet',
-          genres: {},
+          title: "not yet",
+          genres: {}
         },
         1: {
-          title: 'completed',
-          genres: {},
-        },
+          title: "completed",
+          genres: {}
+        }
       },
       currentGameEntity: {
         name: undefined,
         genre: undefined,
         status: undefined,
-        year: undefined,
+        year: undefined
       },
       controlsIsVisible: false,
       notificationServiceEntity: {
         checking: false,
         class: "",
-        message: "",
+        message: ""
       },
       viewConfigEntity: {
-        sort: {
-
-        },
+        sort: {},
         filter: {
           name: undefined,
           genre: undefined,
           year: undefined
         }
-      }
-    }
+      },
+      gameGenres: [
+        "Action",
+        "Shooter",
+        "Arcade",
+        "RPG",
+        "Strategy",
+        "Platformer",
+        "Survival",
+        "Racing"
+      ]
+    };
   },
   methods: {
     notificationService(type, msg) {
@@ -163,72 +172,73 @@ export default {
         this.notificationServiceEntity = {
           checking: false,
           class: "",
-          message: "",
-        }
-      }, 3000)
+          message: ""
+        };
+      }, 3000);
     },
     getData() {
-      axios.get(this.apiUrl)
-        .then((json) => {
-          let response = json.data;
-          // FILTER
-          for (const filter in this.viewConfigEntity.filter) {
-            if (this.viewConfigEntity.filter[filter] !== undefined
-                && this.viewConfigEntity.filter[filter].length > 0
-            ) {
-              response = response.filter((game) => {
-                  return (String(game[filter]).indexOf(this.viewConfigEntity.filter[filter]) !== -1);
-              })
-            }
-          }
-
-          for (const gameStatus in this.gamesView) {
-            this.gamesView[gameStatus].genres = {};
-          }
-          
-          const games_length = response.length;
-          response.map((el) => {
-            if (el.genre === undefined) {
-              el.genre = 'without genre';
-            }
-            if (el.name === undefined) {
-              el.name = 'without name';
-            }
-            if (el.status === undefined) {
-              el.status = 0;
-            }
-          })
-
-          // uniq genres
-          for (let i = 0; i < games_length; i++) {
-            const status = response[i].status;
-            const genre = response[i].genre;
-            Vue.set(this.gamesView[status].genres, genre, []);
-          }
-          // push games to genres
-          for (let i = 0; i < games_length; i++) {
-            this.gamesView[response[i].status].genres[response[i].genre].push({
-              id: response[i]._id,
-              name: response[i].name,
-              genre: response[i].genre,
-              year: response[i].year,
-              status: response[i].status,
+      axios.get(this.apiUrl).then(json => {
+        let response = json.data;
+        // FILTER
+        for (const filter in this.viewConfigEntity.filter) {
+          if (
+            this.viewConfigEntity.filter[filter] !== undefined &&
+            this.viewConfigEntity.filter[filter].length > 0
+          ) {
+            response = response.filter(game => {
+              return (
+                String(game[filter]).indexOf(
+                  this.viewConfigEntity.filter[filter]
+                ) !== -1
+              );
             });
           }
-          console.log(this.gamesView)
+        }
+
+        for (const gameStatus in this.gamesView) {
+          this.gamesView[gameStatus].genres = {};
+        }
+        const games_length = response.length;
+        response.map(el => {
+          if (el.genre === undefined) {
+            el.genre = "without genre";
+          }
+          if (el.name === undefined) {
+            el.name = "without name";
+          }
+          if (el.status === undefined) {
+            el.status = 0;
+          }
         });
+
+        // uniq genres
+        for (let i = 0; i < games_length; i++) {
+          const status = response[i].status;
+          const genre = response[i].genre;
+          Vue.set(this.gamesView[status].genres, genre, []);
+        }
+        // push games to genres
+        for (let i = 0; i < games_length; i++) {
+          this.gamesView[response[i].status].genres[response[i].genre].push({
+            id: response[i]._id,
+            name: response[i].name,
+            genre: response[i].genre,
+            year: response[i].year,
+            status: response[i].status
+          });
+        }
+      });
     },
     gameEdit(game) {
       this.visibleGameOptionId = game.id;
       this.currentGameEntity = game;
     },
     gameDelete(id) {
-      const validation = confirm('are u sure?');
+      const validation = confirm("are u sure?");
       if (validation) {
-        axios.delete(this.apiUrl + id)
-        .then(() => {
+        axios.delete(this.apiUrl + id).then(() => {
           this.getData();
-          this.notificationService('msg-danger', 'game deleted')
+          this.notificationService("msg-danger", "game deleted");
         });
       }
     },
@@ -243,48 +253,60 @@ export default {
         } else {
           newGameRequest.push({
             propName: gameAttribute,
-            value: newGame[gameAttribute],
+            value: newGame[gameAttribute]
           });
         }
       }
       if (!validation) {
-        alert('choose game attributes');
+        alert("choose game attributes");
       } else {
-        axios.post(this.apiUrl, newGameRequest)
-        .then(() => {
+        axios.post(this.apiUrl, newGameRequest).then(() => {
           this.getData();
-          this.notificationService('msg-success', 'game added');
+          this.notificationService("msg-success", "game added");
         });
       }
     },
     gameSave() {
       for (const gameAttribute in this.currentGameEntity) {
         if (this.currentGameEntity[gameAttribute] === undefined) {
-          this.notificationService('msg-danger', 'some fields are empty');
+          this.notificationService("msg-danger", "some fields are empty");
           return;
         }
       }
 
       let newGameRequest = [];
       const newGame = this.currentGameEntity;
+
       for (const gameAttribute in newGame) {
         if (newGame[gameAttribute] === undefined) {
-          validation = false;
+          this.notificationService("msg-danger", "some fields are empty");
         } else {
           newGameRequest.push({
             propName: gameAttribute,
-            value: newGame[gameAttribute],
+            value: newGame[gameAttribute]
           });
         }
       }
 
-      axios.patch('https://peridot-pastry.glitch.me/games/' + this.currentGameEntity.id, newGameRequest)
-      .then(() => {
-        this.getData();
-        this.notificationService('msg-success', 'game changed');
-      })
+      axios
+        .patch(
+          "https://peridot-pastry.glitch.me/games/" + this.currentGameEntity.id,
+          newGameRequest
+        )
+        .then(() => {
+          this.getData();
+          this.notificationService("msg-success", "game changed");
+        });
     },
     viewFilter() {
+      this.getData();
+    },
+    clearFilter() {
+      for (const configs in this.viewConfigEntity) {
+        for (const config in this.viewConfigEntity[configs]) {
+          this.viewConfigEntity[configs][config] = undefined;
+        }
+      }
       this.getData();
     },
     cleanCurrentGame() {
@@ -292,39 +314,41 @@ export default {
         name: undefined,
         genre: undefined,
         status: undefined,
-        year: undefined,
-      }
+        year: undefined
+      };
     }
   },
   created: function() {
     this.getData();
     document.onclick = e => {
       // TODO: bad temporary solution, need to refactor
-      if (e.target.parentNode.classList[0] !== 'games-block_genre__body___game'
-      && e.target.parentNode.classList[0] !== 'new-game_block'
-      && e.target.parentNode.parentNode.classList[0] !== 'new-game_block') {
+      if (
+        e.target.parentNode.classList[0] !== "games-block_genre__body___game" &&
+        e.target.parentNode.classList[0] !== "new-game_block" &&
+        e.target.parentNode.parentNode.classList[0] !== "new-game_block" &&
+        e.target.parentNode.classList[0] !== "header_title"
+      ) {
         this.visibleGameOptionId = undefined;
         this.cleanCurrentGame();
       }
-    }
+    };
   }
-
 };
 </script>
 
 <style scoped lang="scss">
 //fonts
-@import url('https://fonts.googleapis.com/css?family=Rubik');
+@import url("https://fonts.googleapis.com/css?family=Rubik");
 
 //colors
 $darkBlue: #004466;
 $medBlue: #016699;
 $lightBlue: #99cccc;
-$red: #FF2105;
-$success: #26991E; 
+$red: #ff2105;
+$success: #26991e;
 
 * {
-  font-family: 'rubik'
+  font-family: "rubik";
 }
 
 .cr-point:hover {
@@ -393,12 +417,12 @@ $success: #26991E;
   .games-block {
     border: 2px solid $lightBlue;
     border-radius: 5px;
-    box-shadow: 5px 5px 10px rgba(0,0,0,0.25);
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.25);
     display: flex;
     flex-direction: column;
     max-height: 800px;
     overflow: auto;
-    .games-block-container{
+    .games-block-container {
       padding: 20px;
       .games-block_title {
         font-weight: 400;
@@ -409,7 +433,7 @@ $success: #26991E;
         margin-top: 25px;
       }
       .games-block_genres {
-        .games-block_genre{
+        .games-block_genre {
           &:hover {
             cursor: pointer;
           }
@@ -424,10 +448,10 @@ $success: #26991E;
             align-items: flex-start;
             margin-top: 15px;
             flex-flow: row wrap;
-            .games-block_genre__body___game:nth-child(3n+2) {
+            .games-block_genre__body___game:nth-child(3n + 2) {
               margin: 0 12.5%;
             }
-            .games-block_genre__body___game:nth-child(n+4) {
+            .games-block_genre__body___game:nth-child(n + 4) {
               margin-top: 15px;
             }
             .games-block_genre__body___game {
@@ -463,7 +487,7 @@ $success: #26991E;
           }
         }
       }
-    } 
+    }
   }
 }
 h3 {
@@ -491,7 +515,7 @@ a {
   font-size: 16px;
   height: 50px;
   border-radius: 5px;
-  box-shadow: 5px 5px 10px rgba(0,0,0,0.25);
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
