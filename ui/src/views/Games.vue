@@ -1,111 +1,121 @@
 <template>
-  <div class="container">
-    <div class="row">
+  <b-container class="games">
+    <b-row>
       <div class="header">
-        <div class="header_title col-4">
+        <b-col class="header_title" cols="8" md="6" lg="4">
           Played Games
-        </div>
-        <div class="header_title col-1">
+        </b-col>
+        <b-col class="header_title" cols="2">
           <img src="../assets/settings.png" alt="show controls" width="50px" height="50px" v-on:click="controlsIsVisible = true">
-        </div>
+        </b-col>
         <transition name="fade">
           <div class="header_controls" v-if="controlsIsVisible">
-            <div class="container">
-              <div class="row">
-                <div class="header_controls-container">
-                  <div class="header_controls__buttons___new-game col-3">
-                    <div class="new-game_block">
-                      <b-form-select v-model="currentGameEntity.genre">
-                          <option :value="undefined" disabled>genre</option>
-                          <option v-for="genre in gameGenres" v-bind:key="genre" :value="genre">{{ genre }}</option>
+            <b-container>
+              <b-row class="header_controls-container">
+                <b-col class="header_controls__buttons___new-game" cols="5" lg="3">
+                  <div class="new-game_block">
+                    <b-form-select v-model="currentGameEntity.genre">
+                        <option :value="undefined" disabled>genre</option>
+                        <option v-for="genre in gameGenres" v-bind:key="genre" :value="genre">{{ genre }}</option>
+                    </b-form-select>
+                  </div>
+                  <div class="new-game_block">
+                    <div>
+                      <b-form-select v-model="currentGameEntity.status">
+                          <option :value="undefined" disabled> status </option>
+                          <option value="0"> not yet </option>
+                          <option value="1"> completed </option>
                       </b-form-select>
                     </div>
-                    <div class="new-game_block">
-                      <div>
-                        <b-form-select v-model="currentGameEntity.status">
-                            <option :value="undefined" disabled>status</option>
-                            <option value="0">not yet</option>
-                            <option value="1">completed</option>
-                        </b-form-select>
-                      </div>
-                      <div>
-                        <b-form-input v-model="currentGameEntity.year" type="text" placeholder="year"></b-form-input>
-                      </div> 
-                    </div>
-                    <div class="new-game_block">
-                      <b-form-input
-                        v-model="currentGameEntity.name"
-                        type="text"
-                        placeholder="game title"
-                      >
-                    </b-form-input>
-                    </div>
-                    <div class="new-game_block">
-                      <b-button v-on:click="gameAdd()" :variant="'primary'"> add new </b-button>
-                      <b-button v-on:click="gameSave()" :variant="'success'"> save </b-button>
-                    </div>
+                    <div>
+                      <b-form-input v-model="currentGameEntity.year" type="text" placeholder="year"></b-form-input>
+                    </div> 
                   </div>
-                  <div class="header_controls__buttons___filter col-3">
-                    <div class="filter_block">
-                      <b-form-input v-on:change="viewFilter()" v-model="viewConfigEntity.filter.name" type="text" placeholder="name"></b-form-input>
-                    </div>
-                    <div class="filter_block">
-                      <b-form-select v-on:change="viewFilter()" v-model="viewConfigEntity.filter.genre">
-                          <option :value="undefined" disabled>genre</option>
-                          <option v-for="genre in gameGenres" v-bind:key="genre" :value="genre">{{ genre }}</option>
-                      </b-form-select>
-                    </div>
-                    <div class="filter_block">
-                      <b-form-input v-on:change="viewFilter()" v-model="viewConfigEntity.filter.year" type="text" placeholder="year"></b-form-input>
-                    </div>
-                    <div class="filter_block">
-                      <b-button v-on:click="clearFilter()" variant="danger">clear filter</b-button>
-                    </div>
+                  <div class="new-game_block">
+                    <b-form-input
+                      v-model="currentGameEntity.name"
+                      type="text"
+                      placeholder="game title"
+                    >
+                  </b-form-input>
                   </div>
-                  <div class="col-1">
-                    <img class="cr-point" src="../assets/exit.png" alt="hide controls" width="50px" height="50px" v-on:click="controlsIsVisible = false">
+                  <div class="new-game_block">
+                    <b-button v-on:click="gameAdd()" variant="primary"> add new </b-button>
+                    <b-button v-on:click="gameSave()" variant="success"> save </b-button>
                   </div>
-                </div>
-              </div>
-            </div>
+                </b-col>
+                <b-col class="header_controls__buttons___filter" cols="5" lg="3">
+                   <div class="filter_block">
+                    <b-form-input v-on:change="viewFilter()" v-model="viewConfigEntity.filter.name" type="text" placeholder="name"></b-form-input>
+                  </div>
+                  <div class="filter_block">
+                    <b-form-select v-on:change="viewFilter()" v-model="viewConfigEntity.filter.genre">
+                        <option :value="undefined" disabled> genre </option>
+                        <option v-for="genre in gameGenres" v-bind:key="genre" :value="genre">{{ genre }}</option>
+                    </b-form-select>
+                  </div>
+                  <div class="filter_block">
+                    <b-form-input v-on:change="viewFilter()" v-model="viewConfigEntity.filter.year" type="text" placeholder="year"></b-form-input>
+                  </div>
+                  <div class="filter_block">
+                    <b-button v-on:click="clearFilter()" variant="danger"> clear filter </b-button>
+                  </div>
+                </b-col>
+                <b-col cols="col-2">
+                  <img class="cr-point" src="../assets/exit.png" alt="hide controls" width="50px" height="50px" v-on:click="controlsIsVisible = false">
+                </b-col>
+              </b-row>
+            </b-container>
           </div>
         </transition>  
       </div>
-      <div class="games-blocks col-12">
-        <div class="games-block col-5" v-for="gameStatus in gamesView" :key="gameStatus.title">
-          <div class="games-block-container">
-            <div class="games-block_title"> {{ gameStatus.title }} </div>
-            <div class="games-block_genres" v-for="(genre, title) in gameStatus.genres" :key="genre.id">
-              <div class="games-block_genre">
-                <div class="games-block_genre__title">
-                  {{ title }}
-                </div>
-                <div class="games-block_genre__body">
-                  <div class="games-block_genre__body___game" v-for="game in genre" :key="game.id">
-                    <div v-on:click="gameEdit(game)"  class="title"> {{ game.name }} </div>
-                    <div v-if="visibleGameOptionId === game.id" class="edit">
-                      <b-button v-on:click="gameDelete(game.id)" :variant="'danger'"></b-button>
+      <b-container class="games">
+        <b-row class="games-blocks">
+          <b-col
+            class="games-block"
+            cols=10
+            sm=10
+            md=5
+            lg=5
+            xl=5
+            v-for="(gameStatus) in gamesView"
+            :key="gameStatus.title"
+          >
+            <div class="games-block-container">
+              <div class="games-block_title"> {{ gameStatus.title }} </div>
+              <div class="games-block_title"> {{ gameStatus.count }} </div>
+              <div class="games-block_genres" v-for="(genre, title) in gameStatus.genres" :key="genre.id">
+                <div class="games-block_genre">
+                  <div class="games-block_genre__title">
+                    {{ title  }}
+                  </div>
+                  <div class="games-block_genre__body">
+                    <div class="games-block_genre__body___game" v-for="game in genre" :key="game.id">
+                      <div v-on:click="gameEdit(game)"  class="title"> {{ game.name }} </div>
+                      <div v-if="visibleGameOptionId === game.id" class="edit">
+                        <b-button v-on:click="gameDelete(game.id)" :variant="'danger'"></b-button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>  
+                </div>  
+              </div>
             </div>
-          </div> 
-        </div> 
+          </b-col>
+        </b-row>
+      </b-container>
+      <div id="service">
+        <transition name="fade">    
+          <div
+            class="action-msg"
+            :class="notificationServiceEntity.class"
+            v-if="notificationServiceEntity.checking"
+          >
+          {{ notificationServiceEntity.message }}
+          </div>
+        </transition>
       </div>
-    </div>
-    <div id="service">
-      <transition name="fade">    
-        <div
-          class="action-msg"
-          :class="notificationServiceEntity.class"
-          v-if="notificationServiceEntity.checking"
-        >
-        {{ notificationServiceEntity.message }}
-        </div>
-      </transition>
-    </div>
-  </div>
+    </b-row>
+  </b-container>
 </template>
 
 <script>
@@ -124,11 +134,13 @@ export default {
       gamesView: {
         0: {
           title: "not yet",
-          genres: {}
+          genres: {},
+          count: 0
         },
         1: {
           title: "completed",
-          genres: {}
+          genres: {},
+          count: 0
         }
       },
       currentGameEntity: {
@@ -194,7 +206,7 @@ export default {
             });
           }
         }
-
+        // undefined fields
         for (const gameStatus in this.gamesView) {
           this.gamesView[gameStatus].genres = {};
         }
@@ -210,7 +222,6 @@ export default {
             el.status = 0;
           }
         });
-
         // uniq genres
         for (let i = 0; i < games_length; i++) {
           const status = response[i].status;
@@ -226,6 +237,14 @@ export default {
             year: response[i].year,
             status: response[i].status
           });
+        }
+        // games count
+        for (const status in this.gamesView) {
+          let count = 0;
+          for (const genre in this.gamesView[status].genres) {
+            count += Object.keys(this.gamesView[status].genres[genre]).length;
+          }
+          this.gamesView[status].count = count;
         }
       });
     },
@@ -414,6 +433,9 @@ $success: #26991e;
   flex-direction: row;
   align-self: center;
   justify-content: space-between;
+  @media (max-width: 767px) {
+    justify-content: center;
+  }
   .games-block {
     border: 2px solid $lightBlue;
     border-radius: 5px;
@@ -422,6 +444,7 @@ $success: #26991e;
     flex-direction: column;
     max-height: 800px;
     overflow: auto;
+    margin-bottom: 50px;
     .games-block-container {
       padding: 20px;
       .games-block_title {
@@ -431,6 +454,9 @@ $success: #26991e;
       }
       .games-block_genres:not(:first-child) {
         margin-top: 25px;
+      }
+      .games-block_genres:last-child {
+        margin-bottom: 25px;
       }
       .games-block_genres {
         .games-block_genre {
