@@ -29,7 +29,7 @@
                     </div>
                     <div>
                       <b-form-input v-model="currentGameEntity.year" type="text" placeholder="year"></b-form-input>
-                    </div> 
+                    </div>
                   </div>
                   <div class="new-game_block">
                     <b-form-input
@@ -67,7 +67,7 @@
               </b-row>
             </b-container>
           </div>
-        </transition>  
+        </transition>
       </div>
       <b-container class="games">
         <b-row class="games-blocks">
@@ -97,14 +97,14 @@
                       </div>
                     </div>
                   </div>
-                </div>  
+                </div>
               </div>
             </div>
           </b-col>
         </b-row>
       </b-container>
       <div id="service">
-        <transition name="fade">    
+        <transition name="fade">
           <div
             class="action-msg"
             :class="notificationServiceEntity.class"
@@ -123,7 +123,7 @@
 import Vue from "vue";
 import axios from "axios";
 
-Vue.use(axios);
+//Vue.use(axios);
 
 export default {
   name: "games",
@@ -194,7 +194,7 @@ export default {
         // FILTER
         for (const filter in this.viewConfigEntity.filter) {
           if (
-            this.viewConfigEntity.filter[filter] !== undefined &&
+            this.viewConfigEntity.filter[filter] &&
             this.viewConfigEntity.filter[filter].length > 0
           ) {
             response = response.filter(game => {
